@@ -1,0 +1,23 @@
+{
+  "name": "backend-developer-challenge",
+  "version": "1.0.0",
+  "description": "### Objective Create a disbursement report from a list of donations in CSV.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michgboxy2/backend-developer-challenge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michgboxy2/backend-developer-challenge/issues"
+  },
+  "homepage": "https://github.com/michgboxy2/backend-developer-challenge#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
