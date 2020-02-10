@@ -8,6 +8,8 @@ const BASE_CURRENCY_URL = "https://api.exchangeratesapi.io/latest";
 const OPEN_EXCHANGE =
   "https://openexchangerates.org/api/latest.json?app_id=686b6ab396494adb8dded6c4eae48853";
 
+  var jsonexport = require('jsonexport');
+
 exports.currencyList = async (req, res, next) => {
   try {
     let data = await rp(BASE_CURRENCY_URL);
@@ -205,12 +207,14 @@ exports.handleUploads = async (req, res, next) => {
                 Nonprofit: donor,
                 "Total amount": totalDonation,
                 "Total Fee": totalFee,
-                "Number of Donations": donation.length,
-                OrderId: donation["Order Id"]
+                "Number of Donations": donation.length
               });
             }
+            jsonexport(new_arr,function(err, csv){
+              if(err) return console.log(err);
+              res.send(csv);
+          });
 
-            res.send(new_arr);
           } catch (e) {
             console.log(e);
           }

@@ -18,6 +18,15 @@
   },
   "homepage": "https://github.com/michgboxy2/backend-developer-challenge#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "csv-parser": "^2.3.2",
+    "express": "^4.17.1",
+    "fast-csv": "^2.4.1",
+    "formidable": "^1.2.1",
+    "json2csv": "^4.5.4",
+    "jsonexport": "^2.4.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5"
   }
 }
