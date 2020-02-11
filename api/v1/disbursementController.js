@@ -210,10 +210,11 @@ exports.handleUploads = async (req, res, next) => {
                 "Number of Donations": donation.length
               });
             }
-            jsonexport(new_arr,function(err, csv){
-              if(err) return console.log(err);
-              res.send(csv);
-          });
+          //   jsonexport(new_arr,function(err, csv){
+          //     if(err) return console.log(err);
+          //     res.send(csv);
+          // });
+          res.send(new_arr);
 
           } catch (e) {
             console.log(e);
