@@ -10,6 +10,7 @@ const OPEN_EXCHANGE =
 
   var jsonexport = require('jsonexport');
 
+
 exports.currencyList = async (req, res, next) => {
   try {
     let data = await rp(BASE_CURRENCY_URL);
@@ -23,7 +24,7 @@ exports.currencyList = async (req, res, next) => {
 const groupBy = (array, key) => {
   let keyGroup = {};
   // Return the end result
-  return array.reduce((result, currentValue) => {
+    return array.reduce((result, currentValue) => {
     // If an array already present for key, push it to the array. Else create an array and push the object
     (result[currentValue[key]] = result[currentValue[key]] || []).push(
       currentValue
@@ -186,7 +187,7 @@ exports.handleUploads = async (req, res, next) => {
         })
         .on("end", async function() {
           try {
-            let new_arr = [];
+            let final_conversion = [];
 
             let grouped = groupBy(array, "Nonprofit");
             let entries = Object.entries(grouped);
@@ -203,20 +204,18 @@ exports.handleUploads = async (req, res, next) => {
                 0
               );
 
-              new_arr.push({
+              final_conversion.push({
                 Nonprofit: donor,
-                "Total amount": totalDonation,
-                "Total Fee": totalFee,
+                "Total amount": totalDonation.toFixed(2),
+                "Total Fee": totalFee.toFixed(2),
                 "Number of Donations": donation.length
               });
             }
-            jsonexport(new_arr,function(err, csv){
-              if(err) return console.log(err);
-              res.send(csv);
-          });
+          
+          res.send(final_conversion);
 
           } catch (e) {
-            console.log(e);
+            return res.status(422).send({message : "something went wrong", status: "failed"});
           }
         })
         .on("error", function(error) {
