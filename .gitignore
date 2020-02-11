@@ -1,5 +1,6 @@
 node_modules
 stream.js
 disburse.csv
-uploads
 client
+sample.csv
+sample2.csv

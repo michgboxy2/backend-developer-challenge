@@ -1,0 +1,22 @@
+version: '3.6'
+
+services:
+  #Backend API
+  app:
+    container_name: app
+    build: ./
+    command: npm start
+    working_dir: /usr/src/backend_challenge
+    ports:
+    - "3000:3000"
+    environment:
+      PORT: 3000
+      APP_ID: 686b6ab396494adb8dded6c4eae48853
+    volumes:
+      - ./:/usr/src/backend_challenge
+      - ./usr/src/backend_challenge/node_modules
+    
+  
+  
+  
+  

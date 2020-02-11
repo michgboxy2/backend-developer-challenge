@@ -3,23 +3,19 @@ const csv = require("fast-csv");
 const formidable = require("formidable");
 const rp = require("request-promise");
 const BASE_CURRENCY_URL = "https://api.exchangeratesapi.io/latest";
+const app_id = process.env.APP_ID || '686b6ab396494adb8dded6c4eae48853';
 const OPEN_EXCHANGE =
-  "https://openexchangerates.org/api/latest.json?app_id=686b6ab396494adb8dded6c4eae48853";
+  `https://openexchangerates.org/api/latest.json?app_id=${app_id}`;
 
 
 exports.currencyList = async (req, res, next) => {
   try {
     let data = await rp(BASE_CURRENCY_URL);
 
-    let data2 = await rp(OPEN_EXCHANGE);
-
     currency1list = JSON.parse(data).rates;
 
-    currency2list = JSON.parse(data2).rates;
 
-    jointCurrencies = Object.assign({}, currency1list, currency2list);
-
-    res.send(Object.keys(jointCurrencies).sort());
+    res.send(Object.keys(currency1list).sort());
   
   } catch (e) {
     return res.status(422).send({ message: e, status: "failed" });
