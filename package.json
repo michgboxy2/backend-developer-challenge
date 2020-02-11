@@ -4,6 +4,7 @@
   "description": "### Objective Create a disbursement report from a list of donations in CSV.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
