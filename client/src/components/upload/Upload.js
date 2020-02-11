@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import Dropzone from "../dropzone/Dropzone";
 import "./Upload.css";
 import Progress from "../progress/Progress";
+import { CSVLink } from "react-csv";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 class Upload extends Component {
   constructor(props) {
@@ -10,76 +13,65 @@ class Upload extends Component {
       files: {},
       uploading: false,
       uploadProgress: {},
-      successfullUploaded: false
+      successfullUploaded: false,
+      disbursementRecords: [],
+      csvAvailable: false,
+      currencyList: [],
+      currency: ""
     };
 
+    this.exportCSV = this.exportCSV.bind(this);
+    this.onChange = this.onChange.bind(this);
     this.onFilesAdded = this.onFilesAdded.bind(this);
     this.uploadFiles = this.uploadFiles.bind(this);
     this.sendRequest = this.sendRequest.bind(this);
     this.renderActions = this.renderActions.bind(this);
   }
 
+  componentDidMount(){
+    this.getCurrencies();
+  }
+
   onFilesAdded(files) {
-    // this.setState(prevState => ({
-    //   files: file
-    // }));
-    this.setState({files});
+    this.setState({ files });
+  }
+
+  onChange(e) {
+    this.setState({
+      [e.target.name]: e.target.value
+    });
   }
 
   async uploadFiles() {
     this.setState({ uploadProgress: {}, uploading: true });
-    const promises = [];
-    this.state.files.forEach(file => {
-      promises.push(this.sendRequest(file));
-    });
+    this.sendRequest(this.state.files);
     try {
-      await Promise.all(promises);
-
       this.setState({ successfullUploaded: true, uploading: false });
     } catch (e) {
-      // Not Production ready! Do some error handling here instead...
       this.setState({ successfullUploaded: true, uploading: false });
+      toast.error(e);
     }
   }
 
-  sendRequest(file) {
-    return new Promise((resolve, reject) => {
-      const req = new XMLHttpRequest();
+  async sendRequest(file) {
+      const {currency} = this.state;
+      if(!currency){
+        toast.error('kindly select a base currency from the drop down');
+        return null;
+    }
+    const formData = new FormData();
+    formData.append("file", file[0], file.name);
+    formData.append("baseCurrency", currency);
 
-      req.upload.addEventListener("progress", event => {
-        if (event.lengthComputable) {
-          const copy = { ...this.state.uploadProgress };
-          copy[file.name] = {
-            state: "pending",
-            percentage: (event.loaded / event.total) * 100
-          };
-          this.setState({ uploadProgress: copy });
-        }
-      });
-
-      req.upload.addEventListener("load", event => {
-        const copy = { ...this.state.uploadProgress };
-        copy[file.name] = { state: "done", percentage: 100 };
-        this.setState({ uploadProgress: copy });
-        resolve(req.response);
-      });
-
-      req.upload.addEventListener("error", event => {
-        const copy = { ...this.state.uploadProgress };
-        copy[file.name] = { state: "error", percentage: 0 };
-        this.setState({ uploadProgress: copy });
-        reject(req.response);
-      });
-
-      const formData = new FormData();
-      formData.append("file", file, file.name);
-      formData.append("baseCurrency", "CAD");
-
-      console.log(formData);
-
-      req.open("POST", "http://127.0.0.1:3000/api/v1/disburse");
-      req.send(formData);
-    });
+    fetch("http://127.0.0.1:3000/api/v1/disburse", {
+      method: "POST",
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data =>
+        this.setState({ disbursementRecords: data, csvAvailable: true })
+      )
+      .catch(e => {toast.error(e)});
   }
 
   renderProgress(file) {
@@ -102,54 +94,99 @@ class Upload extends Component {
     }
   }
 
+  exportCSV() {
+    const headers = [
+      { label: "Nonprofit", Key: "Nonprofit" },
+      { label: `Total amount ${this.state.currency}`, Key: `Total amount ${this.state.currency}` },
+      { label: "Total Fee", Key: "Total Fee" },
+      { label: "Number of Donations", Key: "Number of Donations" }
+    ];
+  }
+
   renderActions() {
-    if (this.state.successfullUploaded) {
-      return (
-        <button
-          onClick={() =>
-            this.setState({ files: {}, successfullUploaded: false })
-          }
-        >
-          Clear
-        </button>
-      );
-    } else {
-      return (
-        <button
-          disabled={this.state.files.length < 0 || this.state.uploading}
-          onClick={this.uploadFiles}
-        >
-          Upload
-        </button>
-      );
+    if (this.state.files.length > 1) {
+      toast.error("Only one file is allowed for download");
+    }
+
+    if (this.state.files.length === 1) {
+      if (this.state.successfullUploaded) {
+        return (
+          <button onClick={() => this.setState({ successfullUploaded: false })}>
+            Clear
+          </button>
+        );
+      } else {
+        return <button onClick={this.uploadFiles}>Upload</button>;
+      }
     }
   }
 
+  getCurrencies = async () => {
+      fetch("http://127.0.0.1:3000/api/v1/disburse")
+      .then(response => response.json())
+      .then(currency => {
+        this.setState({ currencyList: currency });
+      })
+      .catch(e =>{
+      toast.error(e);
+      })
+   
+  };
+
+  renderDownloadCsvButton = () => {
+    if (this.state.csvAvailable) {
+      return (
+        <CSVLink data={this.state.disbursementRecords}>
+          <button>Download CSV</button>
+        </CSVLink>
+      );
+    }
+  };
+
   render() {
+    const { csvAvailable, currency } = this.state;
+    let i;
+    if (csvAvailable) {
+      toast.success("click the download button to download csv file");
+    }
     return (
       <div className="Upload">
-        <span className="Title">Upload Files</span>
+        <span className="Title">click to Upload Files</span>
         <div className="Content">
-          <div>
+          <div className="row">
             <Dropzone
               onFilesAdded={this.onFilesAdded}
               disabled={this.state.uploading || this.state.successfullUploaded}
             />
+
+            <div className="col-md-5">
+              <div className="input-group mb-1">
+                <select
+                  className="custom-select"
+                  name="currency"
+                  value={this.state.currency}
+                  onChange={this.onChange}
+                >
+                  <option defaultValue>Select currency</option>
+                  {this.state.currencyList.map((currency, i) => {
+                      i++;
+                      return <option key={i} value={currency}>{currency}</option>
+                  })}
+                  
+                </select>
+              </div>
+            </div>
           </div>
           <div className="Files">
-            {/* {this.state.files */}
-            {/* map(file => { */}
-               {/* return ( */}
-                <div className="Row">
-                  <span className="Filename">{this.state.files.name}</span>
-                  {this.renderProgress(this.state.files)}
-                </div>
-            {/* ); */}
-             {/* }) */}
-            {/* } */}
+            <div className="Row">
+              <span className="Filename">{this.state.files.name}</span>
+              {this.renderProgress(this.state.files)}
+            </div>
           </div>
         </div>
         <div className="Actions">{this.renderActions()}</div>
+        {this.renderDownloadCsvButton()}
+        <ToastContainer />
       </div>
     );
   }
