@@ -1,28 +1,32 @@
 const fs = require("fs");
 const csv = require("fast-csv");
-const { Parser } = require("json2csv");
 const formidable = require("formidable");
-const csvParser = require("csv-parser");
 const rp = require("request-promise");
 const BASE_CURRENCY_URL = "https://api.exchangeratesapi.io/latest";
 const OPEN_EXCHANGE =
   "https://openexchangerates.org/api/latest.json?app_id=686b6ab396494adb8dded6c4eae48853";
-
-  var jsonexport = require('jsonexport');
 
 
 exports.currencyList = async (req, res, next) => {
   try {
     let data = await rp(BASE_CURRENCY_URL);
 
-    res.status(200).send(Object.keys(JSON.parse(data).rates));
+    let data2 = await rp(OPEN_EXCHANGE);
+
+    currency1list = JSON.parse(data).rates;
+
+    currency2list = JSON.parse(data2).rates;
+
+    jointCurrencies = Object.assign({}, currency1list, currency2list);
+
+    res.send(Object.keys(jointCurrencies).sort());
+  
   } catch (e) {
     return res.status(422).send({ message: e, status: "failed" });
   }
 };
 
 const groupBy = (array, key) => {
-  let keyGroup = {};
   // Return the end result
     return array.reduce((result, currentValue) => {
     // If an array already present for key, push it to the array. Else create an array and push the object
@@ -43,7 +47,7 @@ const validateInput = (res, validate_format ) => {
     });
   }
 
-  // if(validate_format[0] != '﻿Date'){ return res.status(403).send({message : "first header should be date", status : "failed"})};
+  //validate csv headers
   if (validate_format[0] != "Date") {
     return res.status(403).send({
       message: "first header should be date",
@@ -128,7 +132,7 @@ exports.handleUploads = async (req, res, next) => {
     var newpath = process.cwd() + "/uploads/" + files.file.name;
 
     fs.rename(oldpath, newpath, async function(err) {
-      if (err) throw err;
+      if (err){return res.status(403).send({message : e, status : "failed"})};
 
       console.log("file moved successfully");
 
