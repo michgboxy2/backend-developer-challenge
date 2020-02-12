@@ -16,3 +16,27 @@ Create a disbursement report from a list of donations in CSV.
 - Include instructions on how to set it up and run in the README.md
 - Add your resume and other profile / project links
 - Submit a pull request (PR)
+
+
+
+### HOW TO SETUP AND RUN PROJECT.
+### Using Docker: 
+    - pull project 
+    - run the "docker-compose up".
+    - project runs on port 3000.
+    - go to "127.0.0.1:3000" in your browser
+    - click on the circle to select csv to be uploaded
+    - select currency
+    - click upload
+    - when the upload is completed, a "DOWNLOAD CSV" button will pop up. click to download the csv file.
+
+### Without Docker
+    - pull project
+    - run npm install
+    - run node index.js
+    - go to "127.0.0.1:3000" in your browser
+    - click on the circle to select csv to be uploaded
+    - select currency
+    - click upload
+    - when the upload is completed, a "DOWNLOAD CSV" button will pop up. click to download the csv file.
+

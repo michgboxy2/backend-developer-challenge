@@ -1,4 +1,5 @@
 const fs = require("fs.extra");
+const filef = require('fs');
 const csv = require("fast-csv");
 const formidable = require("formidable");
 const rp = require("request-promise");
@@ -90,7 +91,8 @@ const validateInput = (res, validate_format ) => {
 
 
 exports.handleUploads = async (req, res, next) => {
-  let currencyList = await rp(BASE_CURRENCY_URL);
+  try{
+    let currencyList = await rp(BASE_CURRENCY_URL);
 
   let currencyCode = Object.keys(JSON.parse(currencyList).rates);
   let array = [];
@@ -127,10 +129,8 @@ exports.handleUploads = async (req, res, next) => {
     var oldpath = files.file.path;
     var newpath = process.cwd() + "/uploads/" + files.file.name;
 
-    console.log(oldpath);
-    console.log(newpath);
-
     fs.move(oldpath, newpath, async function(err) {
+    
       if (err){return res.status(403).send({message : err, status : "failed"})};
 
       console.log("file moved successfully");
@@ -150,6 +150,7 @@ exports.handleUploads = async (req, res, next) => {
             
             
 
+            //Check if currency exists in exchangerateapI
             if (conversion_rate[Donation_currency]) {
                            
               let converted_rate = conversion_rate[Donation_currency];
@@ -168,6 +169,7 @@ exports.handleUploads = async (req, res, next) => {
 
               array.push(row);
             } else {
+              //USE openexchangeapi for currency conversion
         
               let Xchange_converted_rate = JSON.parse(OpenXchange).rates;
               
@@ -214,6 +216,11 @@ exports.handleUploads = async (req, res, next) => {
                 "Number of Donations": donation.length
               });
             }
+
+            //delete uploaded file
+            await filef.unlink(newpath, (err) => {
+              if(err){return res.status(403).send({message : err, status : "failed"});}
+            });
           
           res.send(final_conversion);
 
@@ -226,4 +233,13 @@ exports.handleUploads = async (req, res, next) => {
         });
     });
   });
+
+  }catch(e){
+    return res.status(403).send({
+      message: "Something went wrong",
+      status: "failed"
+    });
+
+  }
+  
 };
