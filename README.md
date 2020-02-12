@@ -40,3 +40,10 @@ Create a disbursement report from a list of donations in CSV.
     - click upload
     - when the upload is completed, a "DOWNLOAD CSV" button will pop up. click to download the csv file.
 
+
+###RESUME LINK
+ - https://resume.io/r/575GoZcQq
+
+###Github link
+- https://github.com/michgboxy2
+
