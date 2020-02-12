@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("fs.extra");
 const csv = require("fast-csv");
 const formidable = require("formidable");
 const rp = require("request-promise");
@@ -127,8 +127,11 @@ exports.handleUploads = async (req, res, next) => {
     var oldpath = files.file.path;
     var newpath = process.cwd() + "/uploads/" + files.file.name;
 
-    fs.rename(oldpath, newpath, async function(err) {
-      if (err){return res.status(403).send({message : e, status : "failed"})};
+    console.log(oldpath);
+    console.log(newpath);
+
+    fs.move(oldpath, newpath, async function(err) {
+      if (err){return res.status(403).send({message : err, status : "failed"})};
 
       console.log("file moved successfully");
 
