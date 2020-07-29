@@ -7,7 +7,7 @@ const api     = require("../api/api");
 
 app.use(cors());
 app.use(bps.json());
-app.use(bps.urlencoded({ extended: true  }));
+app.use(bps.urlencoded({ extended: false  }));
 
 app.use("/api/v1", api);
 
